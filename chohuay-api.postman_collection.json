@@ -1,0 +1,646 @@
+{
+  "info": {
+    "name": "ร้านโชห่วย API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API collection for ร้านโชห่วย management system"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "token",    "value": "",                      "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Login (Owner PIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "  pm.collectionVariables.set('token', res.access_token);",
+                  "  console.log('Token saved. Role:', res.role);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pin\": \"1234\"\n}"
+            },
+            "description": "Login ด้วย PIN → ได้ JWT token กลับมา token จะถูก save อัตโนมัติใน collection variable"
+          }
+        },
+        {
+          "name": "Login (Staff PIN)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pin\": \"5678\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📦 Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/products/",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""],
+              "query": [
+                { "key": "search",      "value": "",   "disabled": true },
+                { "key": "category_id", "value": "1",  "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search by Barcode",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/products/search-barcode/8850006100077",
+            "description": "ค้นหาสินค้าจาก barcode (ใช้ตอน scan)"
+          }
+        },
+        {
+          "name": "Create Product — Unit (มาม่า)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"มาม่า ต้มยำกุ้ง\",\n  \"product_type\": \"unit\",\n  \"barcode\": \"8850006100077\",\n  \"cost_source\": \"makro\",\n  \"cost_price\": 5.50,\n  \"sell_price\": 7.00,\n  \"sell_unit\": \"ซอง\",\n  \"initial_qty\": 48,\n  \"min_qty\": 12\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Product — Unit no barcode (ยาเส้น)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ยาเส้น\",\n  \"product_type\": \"unit\",\n  \"barcode\": null,\n  \"cost_source\": \"market\",\n  \"cost_price\": 18.00,\n  \"sell_price\": 25.00,\n  \"sell_unit\": \"ห่อ\",\n  \"initial_qty\": 20,\n  \"min_qty\": 5\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Product — Bulk Weight (น้ำตาลทราย)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"น้ำตาลทราย\",\n  \"product_type\": \"bulk_weight\",\n  \"cost_source\": \"makro\",\n  \"sell_price\": 14.00,\n  \"sell_unit\": \"ถุง\",\n  \"bulk_unit\": \"กระสอบ\",\n  \"bulk_qty\": 50,\n  \"bulk_cost\": 550.00,\n  \"sell_qty_per_unit\": 1,\n  \"initial_qty\": 50,\n  \"min_qty\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "ซื้อมากระสอบ 50 กก. ราคา 550฿ แบ่งขายถุงละ 1 กก. → ต้นทุน 11฿/ถุง"
+          }
+        },
+        {
+          "name": "Create Product — Bulk Weight (ข้าวสาร ครึ่งโล)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ข้าวสาร ครึ่งโล\",\n  \"product_type\": \"bulk_weight\",\n  \"cost_source\": \"makro\",\n  \"sell_price\": 12.00,\n  \"sell_unit\": \"ถุง\",\n  \"bulk_unit\": \"กระสอบ\",\n  \"bulk_qty\": 25,\n  \"bulk_cost\": 350.00,\n  \"sell_qty_per_unit\": 0.5,\n  \"initial_qty\": 50,\n  \"min_qty\": 10\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Product — Bulk Weight (น้ำมันเครื่อง)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"น้ำมันเครื่อง\",\n  \"product_type\": \"bulk_weight\",\n  \"cost_source\": \"other\",\n  \"sell_price\": 25.00,\n  \"sell_unit\": \"ขวด\",\n  \"bulk_unit\": \"แกลลอน\",\n  \"bulk_qty\": 20,\n  \"bulk_cost\": 380.00,\n  \"sell_qty_per_unit\": 1,\n  \"initial_qty\": 20,\n  \"min_qty\": 5\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Product — Farm (พริก)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"พริกขี้หนู\",\n  \"product_type\": \"farm\",\n  \"cost_source\": \"farm\",\n  \"cost_price\": 5.00,\n  \"sell_price\": 15.00,\n  \"sell_unit\": \"ขีด\",\n  \"initial_qty\": 30,\n  \"min_qty\": 5\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sell_price\": 8.00,\n  \"min_qty\": 20\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Product (Soft)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/products/1"
+          }
+        },
+        {
+          "name": "Get Bundle Rules",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/products/1/bundles"
+          }
+        },
+        {
+          "name": "Add Bundle Rule (มาม่า 3=20฿)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/1/bundles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"min_qty\": 3,\n  \"bundle_price\": 20.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "ซื้อ 3 ชิ้น จ่าย 20฿ (ปกติ 21฿)"
+          }
+        },
+        {
+          "name": "Add Bundle Rule (แหนม 2=25฿)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/2/bundles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"min_qty\": 2,\n  \"bundle_price\": 25.00\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Bundle Rule",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/products/1/bundles/1"
+          }
+        },
+        {
+          "name": "Check Bundle Price",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/sales/bundle-price/1?qty=6",
+              "host": ["{{base_url}}"],
+              "path": ["sales", "bundle-price", "1"],
+              "query": [{ "key": "qty", "value": "6" }]
+            },
+            "description": "เช็คว่าซื้อ 6 ชิ้นราคาเท่าไหร่ (2 เซ็ต × bundle + เศษ)"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏪 Stock",
+      "item": [
+        {
+          "name": "List Stock",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/stock/"
+          }
+        },
+        {
+          "name": "Restock — Makro",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/stock/restock",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1,\n  \"qty\": 48,\n  \"unit_cost\": 5.50,\n  \"source\": \"makro\",\n  \"note\": \"แมคโครสาขาพังงา 29/04/68\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Restock — Delivery (น้ำแข็ง)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/stock/restock",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 3,\n  \"qty\": 20,\n  \"unit_cost\": 5.00,\n  \"source\": \"delivery\",\n  \"note\": \"รถน้ำแข็งส่งเช้า\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Restock — Farm (พริก)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/stock/restock",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 5,\n  \"qty\": 30,\n  \"unit_cost\": 5.00,\n  \"source\": \"farm\",\n  \"note\": \"เก็บจากสวนหลังบ้าน\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Purchase History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/stock/purchase-history/1",
+            "description": "ดูประวัติต้นทุนย้อนหลัง เพื่อเปรียบเทียบว่าซื้อจากไหนถูกกว่า"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Sales",
+      "item": [
+        {
+          "name": "Create Sale — Cash (ปกติ)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/sales/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_credit\": false,\n  \"payment_method\": \"cash\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"qty\": 2,\n      \"unit_price\": 7.00,\n      \"unit_cost\": 5.50\n    },\n    {\n      \"product_id\": 2,\n      \"qty\": 1,\n      \"unit_price\": 25.00,\n      \"unit_cost\": 18.00\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Sale — Cash with Bundle (มาม่า 3 ชิ้น = 20฿)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/sales/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_credit\": false,\n  \"payment_method\": \"cash\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"qty\": 3,\n      \"unit_price\": 6.67,\n      \"unit_cost\": 5.50,\n      \"bundle_rule_id\": 1\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "unit_price = 20/3 ≈ 6.67 (frontend คำนวณมาจาก /sales/bundle-price)"
+          }
+        },
+        {
+          "name": "Create Sale — QR Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/sales/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_credit\": false,\n  \"payment_method\": \"qr\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"qty\": 5,\n      \"unit_price\": 7.00,\n      \"unit_cost\": 5.50\n    }\n  ],\n  \"note\": \"สแกน QR พร้อมเพย์\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Sale — Credit (ติดหนี้)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/sales/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"is_credit\": true,\n  \"payment_method\": \"cash\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"qty\": 3,\n      \"unit_price\": 7.00,\n      \"unit_cost\": 5.50\n    },\n    {\n      \"product_id\": 3,\n      \"qty\": 2,\n      \"unit_price\": 5.00,\n      \"unit_cost\": 3.00\n    }\n  ],\n  \"note\": \"ป้าแดงมาซื้อ ขอติดหนี้ก่อน\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "⚠️ เฉพาะ owner เท่านั้น — ระบบจะ auto สร้าง debt transaction ให้"
+          }
+        },
+        {
+          "name": "Cancel Sale (Soft)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/sales/1",
+            "description": "⚠️ เฉพาะ owner — คืนสต๊อกอัตโนมัติ"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Customers",
+      "item": [
+        {
+          "name": "List Customers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/customers/",
+              "host": ["{{base_url}}"],
+              "path": ["customers", ""],
+              "query": [{ "key": "search", "value": "สมชาย", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/customers/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ป้าแดง บ้านใกล้\",\n  \"phone\": \"0812345678\",\n  \"note\": \"บ้านหลังวัด ขาประจำ\",\n  \"credit_limit\": 500\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/customers/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credit_limit\": 1000,\n  \"note\": \"บ้านหลังวัด ขาประจำ จ่ายตรงเวลา\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💸 Debt",
+      "item": [
+        {
+          "name": "Debt Overview (ทุกคน)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/debt/overview",
+            "description": "สรุปหนี้ทุกคนเรียงตามยอดมาก→น้อย"
+          }
+        },
+        {
+          "name": "Customer Debt History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/debt/customer/1",
+            "description": "ดูประวัติหนี้ทั้งหมดของลูกค้า + running balance"
+          }
+        },
+        {
+          "name": "Pay Debt — Full",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/debt/payment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"amount\": 450.00,\n  \"note\": \"จ่ายครบ\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Pay Debt — Partial (จ่ายบางส่วน)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/debt/payment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"amount\": 200.00,\n  \"note\": \"จ่ายครึ่งเดียวก่อน เดือนหน้าจ่ายส่วนที่เหลือ\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📱 Services (โอน/เติมเงิน)",
+      "item": [
+        {
+          "name": "List Services",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/services/"
+          }
+        },
+        {
+          "name": "Record Transfer (โอนเงิน)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/services/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"transfer\",\n  \"amount\": 1000.00,\n  \"fee\": 20.00,\n  \"note\": \"โอน SCB ให้ลูกค้า\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Record Topup (เติมเงินมือถือ)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{base_url}}/services/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"topup\",\n  \"amount\": 50.00,\n  \"fee\": 5.00,\n  \"note\": \"เติม AIS 50บาท\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📊 Reports",
+      "item": [
+        {
+          "name": "Daily Summary (7 วันล่าสุด)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/reports/daily",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "daily"],
+              "query": [
+                { "key": "start", "value": "2025-04-01", "disabled": true },
+                { "key": "end",   "value": "2025-04-29", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Daily Summary (filter date)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/reports/daily?start=2025-04-01&end=2025-04-29",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "daily"],
+              "query": [
+                { "key": "start", "value": "2025-04-01" },
+                { "key": "end",   "value": "2025-04-29" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Low Stock Alert",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/reports/low-stock"
+          }
+        },
+        {
+          "name": "Top Products (7 วัน)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/reports/top-products?days=7",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "top-products"],
+              "query": [{ "key": "days", "value": "7" }]
+            }
+          }
+        },
+        {
+          "name": "Top Products (30 วัน)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/reports/top-products?days=30",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "top-products"],
+              "query": [{ "key": "days", "value": "30" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏥 Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/health"
+          }
+        }
+      ]
+    }
+
+  ]
+}

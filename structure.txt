@@ -1,0 +1,38 @@
+chohuay-api/
+├── main.py
+├── requirements.txt
+├── .env
+│
+├── core/
+│   ├── config.py          # settings จาก .env
+│   ├── database.py        # SQLAlchemy engine + session
+│   ├── security.py        # PIN hashing, JWT token
+│   └── dependencies.py    # get_db, get_current_user, require_owner
+│
+├── models/                # SQLAlchemy ORM models (map กับ schema.sql)
+│   ├── user.py
+│   ├── product.py         # Product, ProductVariant, BundleRule, Category
+│   ├── stock.py           # Stock, PurchaseLog
+│   ├── sale.py            # Sale, SaleItem
+│   ├── customer.py        # Customer
+│   ├── debt.py            # DebtTransaction
+│   └── service.py         # ServiceTransaction
+│
+├── schemas/               # Pydantic schemas (request/response)
+│   ├── auth.py
+│   ├── product.py
+│   ├── stock.py
+│   ├── sale.py
+│   ├── customer.py
+│   ├── debt.py
+│   └── service.py
+│
+└── routers/               # FastAPI routers แยกตาม domain
+    ├── auth.py
+    ├── products.py
+    ├── stock.py
+    ├── sales.py
+    ├── customers.py
+    ├── debt.py
+    ├── services.py
+    └── reports.py
