@@ -1,10 +1,18 @@
-from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text, func
+import enum
+from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 from core.database import Base
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
+class CostSource(enum.Enum):
+    MAKRO = 'makro'
+    SUPER_CHEAP = 'super_cheap'
+    MARKET = 'market'
+    DELIVERY = 'delivery'
+    FARM = 'farm'
+    OTHER = 'other'
 
 class Stock(Base):
     __tablename__ = "stock"
@@ -30,7 +38,7 @@ class PurchaseLog(Base):
     qty        : Mapped[Decimal]         = mapped_column(Numeric(10, 3))
     unit_cost  : Mapped[Decimal]         = mapped_column(Numeric(10, 2))
     total_cost : Mapped[Decimal]         = mapped_column(Numeric(10, 2))
-    source     : Mapped[str]             = mapped_column(String(20), default="other")
+    source     : Mapped[CostSource]      = mapped_column(Enum(CostSource, name="cost_source", create_type=True), default=CostSource.OTHER)
     note       : Mapped[Optional[str]]   = mapped_column(Text, nullable=True)
     created_by : Mapped[int]             = mapped_column(ForeignKey("users.id"))
     created_at : Mapped[datetime]        = mapped_column(DateTime(timezone=True), default=func.now())
