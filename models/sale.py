@@ -17,7 +17,12 @@ class Sale(Base):
     customer_id    : Mapped[Optional[int]]   = mapped_column(ForeignKey("customers.id"), nullable=True)
     is_credit      : Mapped[bool]            = mapped_column(Boolean, default=False)
     payment_method : Mapped[PaymentMethod]   = mapped_column(
-        Enum(PaymentMethod, native_enum=False, name="sale_payment_method"),
+        Enum(
+            PaymentMethod,
+            native_enum=False,
+            create_constraint=True,
+            name="sale_payment_method"
+        ),
         default=PaymentMethod.CASH
     )
     slip_image_url : Mapped[Optional[str]]   = mapped_column(Text, nullable=True)
