@@ -1,7 +1,7 @@
-from sqlalchemy import String, Boolean, Numeric, Text
+from sqlalchemy import Boolean, DateTime, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 from core.database import Base
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -15,4 +15,4 @@ class Customer(Base):
     note         : Mapped[Optional[str]]   = mapped_column(Text, nullable=True)
     credit_limit : Mapped[Decimal]         = mapped_column(Numeric(10, 2), default=500)
     is_active    : Mapped[bool]            = mapped_column(Boolean, default=True)
-    created_at   : Mapped[datetime]        = mapped_column(default=datetime.now(timezone.utc))
+    created_at   : Mapped[datetime]        = mapped_column(DateTime(timezone=True), default=func.now())

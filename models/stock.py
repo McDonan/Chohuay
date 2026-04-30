@@ -1,7 +1,7 @@
-from sqlalchemy import Numeric, ForeignKey, Text, String
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 from core.database import Base
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -14,7 +14,11 @@ class Stock(Base):
     variant_id : Mapped[Optional[int]] = mapped_column(ForeignKey("product_variants.id"), nullable=True)
     quantity   : Mapped[Decimal] = mapped_column(Numeric(10, 3), default=0)
     min_qty    : Mapped[Decimal] = mapped_column(Numeric(10, 3), default=5)
-    updated_at : Mapped[datetime] = mapped_column(default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    updated_at : Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=func.now(),
+        onupdate=func.now(),
+    )
 
 
 class PurchaseLog(Base):
@@ -29,4 +33,4 @@ class PurchaseLog(Base):
     source     : Mapped[str]             = mapped_column(String(20), default="other")
     note       : Mapped[Optional[str]]   = mapped_column(Text, nullable=True)
     created_by : Mapped[int]             = mapped_column(ForeignKey("users.id"))
-    created_at : Mapped[datetime]        = mapped_column(default=datetime.now(timezone.utc))
+    created_at : Mapped[datetime]        = mapped_column(DateTime(timezone=True), default=func.now())

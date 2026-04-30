@@ -1,7 +1,7 @@
-from sqlalchemy import String, Boolean, Numeric, Integer, ForeignKey
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 from core.database import Base
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -30,8 +30,8 @@ class Product(Base):
     sell_qty_per_unit : Mapped[Optional[Decimal]] = mapped_column(Numeric(10,3), nullable=True)
 
     is_active         : Mapped[bool]             = mapped_column(Boolean, default=True)
-    deleted_at        : Mapped[Optional[datetime]] = mapped_column(nullable=True)
-    created_at        : Mapped[datetime]          = mapped_column(default=datetime.now(timezone.utc))
+    deleted_at        : Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at        : Mapped[datetime]          = mapped_column(DateTime(timezone=True), default=func.now())
 
     @property
     def computed_cost(self) -> Optional[Decimal]:
