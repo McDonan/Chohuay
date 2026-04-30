@@ -1,10 +1,14 @@
-from sqlalchemy import Boolean, DateTime, ForeignKey, Numeric, String, Text, func
+import enum
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Numeric, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 from core.database import Base
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
+class PaymentMethod(enum.Enum):
+    CASH = 'cash'
+    QR = 'qr'
 
 class Sale(Base):
     __tablename__ = "sales"
@@ -12,7 +16,10 @@ class Sale(Base):
     id             : Mapped[int]             = mapped_column(primary_key=True)
     customer_id    : Mapped[Optional[int]]   = mapped_column(ForeignKey("customers.id"), nullable=True)
     is_credit      : Mapped[bool]            = mapped_column(Boolean, default=False)
-    payment_method : Mapped[str]             = mapped_column(String(10), default="cash")  # cash | qr
+    payment_method : Mapped[PaymentMethod]   = mapped_column(
+        Enum(PaymentMethod, native_enum=False, name="sale_payment_method"),
+        default=PaymentMethod.CASH
+    )
     slip_image_url : Mapped[Optional[str]]   = mapped_column(Text, nullable=True)
     total_amount   : Mapped[Decimal]         = mapped_column(Numeric(10, 2))
     total_cost     : Mapped[Decimal]         = mapped_column(Numeric(10, 2))
