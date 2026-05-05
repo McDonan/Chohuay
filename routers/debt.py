@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from core.database import get_db
 from core.dependencies import require_owner
-from models.debt import DebtTransaction
+from models.debt import DebtTransaction, DebtTxType
 from models.customer import Customer
 
 router = APIRouter()
@@ -36,7 +36,7 @@ async def pay_debt(
 
     db.add(DebtTransaction(
         customer_id = body.customer_id,
-        type        = "payment",
+        type        = DebtTxType.PAYMENT,
         amount      = body.amount,
         note        = body.note,
         created_by  = user["id"],
@@ -61,13 +61,13 @@ async def get_customer_debt(
     running = Decimal("0")
     history = []
     for tx in rows:
-        if tx.type == "charge":
+        if tx.type == DebtTxType.CHARGE:
             running += tx.amount
         else:
             running -= tx.amount
         history.append({
             "id"        : tx.id,
-            "type"      : tx.type,
+            "type"      : tx.type.value,
             "amount"    : tx.amount,
             "balance"   : running,
             "note"      : tx.note,

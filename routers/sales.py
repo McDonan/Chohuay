@@ -10,7 +10,7 @@ from core.dependencies import get_current_user
 from models.sale import Sale, SaleItem
 from models.stock import Stock
 from models.product import Product
-from models.debt import DebtTransaction
+from models.debt import DebtTransaction, DebtTxType
 from models.product import BundleRule
 
 router = APIRouter()
@@ -68,7 +68,7 @@ async def create_sale(
     if body.is_credit and body.customer_id:
         db.add(DebtTransaction(
             customer_id = body.customer_id,
-            type        = "charge",
+            type        = DebtTxType.CHARGE,
             amount      = total_amount,
             sale_id     = sale.id,
             created_by  = user["id"],
