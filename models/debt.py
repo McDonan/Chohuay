@@ -19,7 +19,7 @@ class DebtTransaction(Base):
     id          : Mapped[int]           = mapped_column(primary_key=True)
     customer_id : Mapped[int]           = mapped_column(ForeignKey("customers.id"))
     type        : Mapped[DebtTxType]    = mapped_column(
-        Enum(DebtTxType, name="debt_tx_type", native_enum=True)
+        Enum(DebtTxType, name="debt_tx_type", native_enum=True, values_callable=lambda x: [e.value for e in x])
     )
     amount      : Mapped[Decimal]       = mapped_column(Numeric(10, 2))
     sale_id     : Mapped[Optional[int]] = mapped_column(ForeignKey("sales.id"), nullable=True)
